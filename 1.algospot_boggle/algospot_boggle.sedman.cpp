@@ -6,7 +6,7 @@
 #include <algorithm>
 
 //g++ -o algo_boggle algo_boggle.cpp -std=c++11
-
+ 
 class boggle
 {
 public:
