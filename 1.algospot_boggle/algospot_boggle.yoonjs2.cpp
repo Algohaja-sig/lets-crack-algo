@@ -5,6 +5,7 @@ const int SIZE = 5;
 const int PIVOT_SIZE = 9;
 const int dX[PIVOT_SIZE] = { 1, 1, 0, -1, -1, -1,  0,  1 };
 const int dY[PIVOT_SIZE] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+bool EXIST_MAP[255];
 
 bool digg(int startX, int startY, char table[][6], char* word, int indexForFind) {
 	const int x = startX;
@@ -38,8 +39,6 @@ bool digg(int startX, int startY, char table[][6], char* word, int indexForFind)
 
 bool isExists(char table[][6], char* word) {
 		
-	// Check every tokens in words exist in table
-	
 	for (int row = 0; row < SIZE; row++) {
 		for (int column = 0; column < SIZE; column++) {
 			const char token = table[row][column];
@@ -57,7 +56,7 @@ int main(void) {
 
 	int tc, T;
 		
-	//freopen("input_timeout.txt", "r", stdin);
+	//freopen("input.txt", "r", stdin);
 	
 	//setbuf(stdout, NULL);
 
@@ -71,21 +70,40 @@ int main(void) {
 		int row, column;
 		char table[SIZE][SIZE + 1];
 		
+		// Read table and create exist map
 		for (row = 0; row < SIZE; row++) {			
 			scanf("%s", table[row]);
 			char* str = table[row];
 			for (column = 0; column < SIZE; column++) {
-				str[column];
+				int code = str[column];
+				EXIST_MAP[code] = true;
 			}
 		}
 
-		int count, totalWords;
+		// Read testcase
+		int totalWords;
 		scanf("%d", &totalWords);
-		for (count = 0; count < totalWords; count++) {
-
+		for (int count = 0; count < totalWords; count++) {
+			
 			char word[11];
-
 			scanf("%s", word);
+
+			// Filter out invalid testcase
+			bool skip = false;
+			const int TOTAL = strlen(word);
+			for (int index = 0; index < TOTAL; index++) {
+				int code = word[index];
+				if (!EXIST_MAP[code]) {
+					skip = true;
+					break;
+				}
+			}
+			if (skip) {
+				printf("%s NO\n", word);
+				continue;
+			}
+
+			// Check existance of word in table
 			if (isExists(table, word)) {
 				printf("%s YES\n", word);
 			}
@@ -97,3 +115,4 @@ int main(void) {
 	
 	return 0;
 }
+
