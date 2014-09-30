@@ -1,22 +1,24 @@
 #include <iostream>
-#include <unordered_map>
-#include <map>
+//#include <unordered_map>
+//#include <map>
+#include <vector>
 #include <memory>
 #include <array>
 #include <algorithm>
 
 //g++ -o algo_boggle algo_boggle.cpp -std=c++11
- 
+
 class boggle
 {
 public:
 	//typedef std::unique_ptr<std::string> str_type;
 	typedef std::string str_type;
-	typedef std::unordered_map<str_type, str_type> hash_map; 
+	//typedef std::unordered_map<str_type, str_type> hash_map; 
 	//typedef std::map<str_type, str_type> hash_map; 
 	//typedef sequencial_map<str_type, str_type> hash_map; 
 
-	hash_map calc(void)
+	//hash_map calc(void)
+	std::vector<std::string> calc(void)
 	//void calc(void)
 	{
 		//get ready
@@ -40,24 +42,28 @@ public:
 			if(run(str) == true)
 			{
 				//std::cout<<"TRUE"<<std::endl;
-				map.insert(std::make_pair(std::move(str), std::move(std::string("YES"))));
+				//map.insert(std::make_pair(std::move(str), std::move(std::string("YES"))));
+				result.push_back(str + " YES");
 			}
 			else
 			{
-				map.insert(std::make_pair(std::move(str), std::move(std::string("NO"))));
+				//map.insert(std::make_pair(std::move(str), std::move(std::string("NO"))));
 				//std::cout<<"FALSE"<<std::endl;
+				result.push_back(str + " NO");
 			}
 			//std::cout<<"-----------------------\n";
 			--n;
 		}
 
-		return std::move(map);
+		return std::move(result);
 	}
 
 private:
 	static const std::size_t nBlocks = 5;
 	char blocks[nBlocks][nBlocks];
-	hash_map map;
+	//hash_map map;	
+	std::vector<std::string> result;
+		
 	std::string matched_str;
 
 	char getBlock(const int cur_pos) const
@@ -68,7 +74,27 @@ private:
 	bool run(const std::string &given_str)
 	{
 		int cur_pos = 0; 
-		for(; cur_pos < nBlocks*nBlocks; ++cur_pos)
+		char temp_char;
+		bool found = false;
+		for(auto byte_char : given_str)
+		{
+			for(cur_pos = 0; cur_pos < nBlocks*nBlocks; ++cur_pos)
+			{
+				if(getBlock(cur_pos) == byte_char)
+				{
+					found = true;
+				}
+			}
+
+			if(found == false)
+			{
+				return false;
+			}
+
+			found = false;
+		}
+
+		for(cur_pos = 0; cur_pos < nBlocks*nBlocks; ++cur_pos)
 		{
 			matched_str.clear();
 			if(getBlock(cur_pos) == given_str[0]  
@@ -222,7 +248,8 @@ int main(void)
 
 	int i;
 	unsigned int input = 0;
-	std::unique_ptr<boggle::hash_map[]> result(new boggle::hash_map[total]);
+	//std::unique_ptr<boggle::hash_map[]> result(new boggle::hash_map[total]);
+	std::unique_ptr<std::vector<std::string>[]> result(new std::vector<std::string>[total]);
 
 	boggle bog;
 	for(i = 0; i < total; i++)
@@ -234,11 +261,11 @@ int main(void)
 	
     for(i = 0; i< total; i++)
 	{
-		std::for_each(result[i].begin(), result[i].end(), [](const boggle::hash_map::value_type& item) 
-		{ std::cout<<item.first<<" "<<item.second<<std::endl; });
+		//std::for_each(result[i].begin(), result[i].end(), [](const boggle::hash_map::value_type& item) 
+		//{ std::cout<<item.first<<" "<<item.second<<std::endl; });
+		std::for_each(result[i].begin(), result[i].end(), [](const std::string &item)
+		{ std::cout<<item<<std::endl; });
 	}
-
-	return 0;
 
 	return 0;
 }	
