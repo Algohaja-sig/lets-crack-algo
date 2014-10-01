@@ -6,7 +6,6 @@ const int PIVOT_SIZE = 9;
 const int MAX_WORD_LENGTH = 11;
 const int dX[PIVOT_SIZE] = { 1, 1, 0, -1, -1, -1,  0,  1 };
 const int dY[PIVOT_SIZE] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-bool EXIST_MAP[255] = {};
 bool EXIST_MAP2[255][255] = {};
 
 
@@ -54,7 +53,7 @@ int main(void) {
 			for (int column = 0; column < SIZE; column++) {				
 				
 				const int index = table[row][column];
-				EXIST_MAP[index] = true;
+				//EXIST_MAP[index] = true;
 				bool* map = EXIST_MAP2[index];
 				for (int indexForPivot = 0; indexForPivot < PIVOT_SIZE; ++indexForPivot) {
 					const int newX = dX[indexForPivot] + column;
@@ -81,22 +80,7 @@ int main(void) {
 			
 			char word[MAX_WORD_LENGTH];
 			scanf("%s", word);
-
-			// Filter out invalid testcase			
-			bool skip = false;
-			const int TOTAL = strlen(word);
-			for (int index = 0; index < TOTAL; index++) {
-				int code = word[index];
-				if (!EXIST_MAP[code]) {
-					skip = true;
-					break;
-				}
-			}
-			if (skip) {
-				printf("%s NO\n", word);
-				continue;
-			}
-
+			
 			// Check existance of word in table
 			if (isExistsFast(word)) {
 				printf("%s YES\n", word);
