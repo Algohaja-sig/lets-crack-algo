@@ -58,7 +58,7 @@ public:
 		return std::move(result);
 	}
 
-private:
+protected:
 	static const std::size_t nBlocks = 5;
 	char blocks[nBlocks][nBlocks];
 	//hash_map map;	
@@ -71,6 +71,7 @@ private:
 		return blocks[cur_pos / nBlocks][cur_pos % nBlocks];
 	}
 
+private:
 	bool run(const std::string &given_str)
 	{
 		int cur_pos = 0; 
@@ -97,10 +98,20 @@ private:
 		for(cur_pos = 0; cur_pos < nBlocks*nBlocks; ++cur_pos)
 		{
 			matched_str.clear();
-			if(getBlock(cur_pos) == given_str[0]  
-			&& searchWord(given_str, cur_pos, matched_str) == true)
+			if(getBlock(cur_pos) == given_str[0])
 			{
-				return true;
+				if(given_str.length() == 1)
+				{
+					return true;
+				}
+		
+				//init 
+				matched_str.push_back(given_str[0]);
+
+				if(searchWord(given_str, cur_pos, matched_str) == true)
+				{
+					return true;
+				}
 			}
 		}
 
@@ -198,7 +209,7 @@ private:
 		return std::move(adjacent);
 	}
 
-	bool searchWord(const std::string &given_str
+	virtual bool searchWord(const std::string &given_str
 	, const int cur_pos_on_blocks
 	, std::string &matched_str)
 	{
@@ -207,13 +218,7 @@ private:
 		{
 			return true;	
 		}
-
-		//init 
-		if(matched_str.empty() == true)	
-		{
-			matched_str.push_back(given_str[0]);
-		}
-
+		
 		//std::cout<<"matched str size : "<<matched_str.size()<<std::endl;
 		//get next char
 		char next_char = given_str[matched_str.size()];
@@ -224,7 +229,7 @@ private:
 			if(found_idx == -1)
 			{
 				//std::cerr<<"no found"<<std::endl;
-				break;
+				continue;
 			}
 
 			matched_str.push_back(getBlock(found_idx));
@@ -241,6 +246,80 @@ private:
 	}
 };
 
+
+/* BUG (FIXME)
+ * it can't check boundary.
+ * e.g.) if current position is 20 then checks  
+ * current position + (1*5 + -1*1) results in 24 which crosses boundary.
+ */
+class boggleTextbook : public boggle
+{
+private:
+	const int dx[8] = { -1, -1, -1,  1, 1, 1,  0, 0 };
+	const int dy[8] = { -1,  0,  1, -1, 0, 1, -1, 1 };//*5
+
+	bool inRange(const int pos)
+	{
+		return (pos <= 24) ? true : false;
+	}
+
+	//role as adapter
+	bool searchWord(const std::string &given_str
+	, const int cur_pos
+	, std::string &not_used)
+	{
+		std::string word = given_str;//const_cast<std::string>(given_str);
+		//word = word.substr(1);
+		
+		std::cout<<"\n word : "<<word<<std::endl;
+
+		for(int direction = 0; direction < 8; ++direction)
+		{
+			int next_pos = cur_pos + dy[direction] * 5 + dx[direction];
+			std::string nextword = word.substr(1);
+			if(hasWord(next_pos, nextword) == true)
+			{
+				return true;
+			}
+		}
+	}
+
+	bool hasWord(const int cur_pos
+	, std::string &word)
+	{
+		//std::cout<<"cur_pos : "<<cur_pos<<std::endl;
+		if(inRange(cur_pos) == false)
+		{
+			return false;
+		}
+
+		if(getBlock(cur_pos) != word[0])
+		{
+			return false;
+		}
+
+		if(word.length() == 1)
+		{
+			std::cout<<"hit!! pos : "<<cur_pos<<std::endl;
+			return true;
+		}
+
+		for(int direction = 0; direction < 8; ++direction)
+		{
+			int next_pos = cur_pos + dy[direction] * 5 + dx[direction];
+
+			std::string nextword = word.substr(1);
+			if(hasWord(next_pos, nextword) == true)
+			{
+				std::cout<<"pos : "<<cur_pos<<std::endl;
+				return true;
+			}
+		}
+
+		return false;
+	}
+};
+
 int main(void)
 {
 	unsigned int total;
@@ -250,11 +329,11 @@ int main(void)
 	unsigned int input = 0;
 	//std::unique_ptr<boggle::hash_map[]> result(new boggle::hash_map[total]);
 	std::unique_ptr<std::vector<std::string>[]> result(new std::vector<std::string>[total]);
-
-	boggle bog;
+	
+	std::unique_ptr<boggle> bog(new boggle);
 	for(i = 0; i < total; i++)
 	{
-		result[i] = bog.calc();
+		result[i] = bog->calc();
 	}
 	
 	//std::cout<<"\n result \n";
