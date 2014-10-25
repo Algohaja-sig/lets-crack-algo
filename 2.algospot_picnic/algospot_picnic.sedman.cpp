@@ -4,21 +4,26 @@
 #include <algorithm>
 
 
+/** TODO
+ *  1. performance improvement.
+ *  2. need more simple way to print debug like passing ostream into customized cout.
+ *  3. make more c++11 like!
+ */
+
 //#define DEBUG
 
 class picnic
 {
 private:
-	std::size_t numOfStudent;
-	std::size_t numOfPair;
-	std::size_t numOfPairInOne;
+	std::size_t numOfStudent = 0;
+	std::size_t numOfPair = 0;
+	std::size_t numOfPairInOne = 0;
 	std::size_t total = 0;
 
 	class pair
 	{
 	public:
 		int x = 0,y = 0;
-		bool valid = false; 
 
 		bool operator!=(const pair &rhs)
 		{
