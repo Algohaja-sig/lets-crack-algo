@@ -32,6 +32,7 @@ private:
 				return false;
 			}
 
+			//Note!!
 			if(x == rhs.x || y == rhs.y
 			|| x == rhs.y || y == rhs.x)
 			{
@@ -54,48 +55,33 @@ private:
 		}
 
 	};
-
-	bool duplicateInGroup(const std::vector<pair> &group, const pair& p)
-	{
-		
-		for(auto item : group)
-		{
-			if(item == p)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
+	
 	bool getPair(std::vector<pair> &remain, std::vector<pair> &paired)
 	{
 #ifdef DEBUG
-		std::cout<<"------in\n";
+		std::cout<<"------in\n\n";
 #endif	
 		if(paired.size() == numOfPairInOne)
 		{
 			total++;
+			remain.clear();
 #ifdef DEBUG			
 			std::for_each(paired.begin(), paired.end(), [](const pair& item) { item.print("pair:");});
-			std::cout<<"++++++++++++hit!\n\n";
+			std::cout<<"++++++++++++hit!"<<remain.size()<<"\n\n";
 #endif	
+
 			return true;
 		}
 
-		if(remain.size() == 0)
-		{
-#ifdef DEBUG
-			std::cout<<"remain becomes zero\n";
-#endif			
-			return false;
-		}
-
+		
+		//remain and paired vector must be always seperated.
+		//So remove item in remain vector if duplicate
 		std::vector<pair>::iterator pos = remain.begin();
+		
+		pair latest = paired[paired.size() - 1];
 		while(pos != remain.end())
 		{
-			if(duplicateInGroup(paired, *pos) == true)
+			if(*pos == latest)
 			{
 				pos->print("duplicated!");
 				remain.erase(pos);
@@ -104,6 +90,14 @@ private:
 			{
 				++pos;
 			}
+		}
+
+		if(remain.size() == 0)
+		{
+#ifdef DEBUG
+			std::cout<<"remain becomes zero\n";
+#endif			
+			return false;
 		}
 
 		std::vector<pair> remainHere;
@@ -118,7 +112,7 @@ private:
 			paired.push_back(*pos);	
 
 #ifdef DEBUG
-			std::cout<<"[before]remain size : "<<remainHere.size()<<" paired size : "<<paired.size()<<std::endl;
+			std::cout<<"[before]remain size : "<<remain.size()<<" paired size : "<<paired.size()<<std::endl;
 #endif
 
 			bool ret = getPair(remain, paired);
@@ -126,7 +120,7 @@ private:
 #ifdef DEBUG
 			std::cout<<"[after]remain size : "<<remainHere.size()<<" paired size : "<<paired.size()<<std::endl;
 #endif
-	
+			//restore remain from remainHere vector.
 			if(ret == false)
 			{
 				remain.assign(remainHere.begin(), remainHere.end());
@@ -136,19 +130,21 @@ private:
 
 			++pos;
 		}
-
+#ifdef DEBUG
+		std::cout<<"------out\n\n";
+#endif	
 		return false;
 	}
 
-	std::size_t getDuplicate(std::size_t pairs)                                                                                         
-	{                                                                                                                                   
-		std::size_t cases = pairs;                                                                                                      
-		while((--pairs) > 1)                                                                                                            
-		{                                                                                                                               
-			cases *= pairs;                                                                                                             
-		}                                                                                                                               
+	std::size_t getDuplicate(std::size_t pairs)        
+	{                                                  
+		std::size_t cases = pairs;                     
+		while((--pairs) > 1)                           
+		{                                              
+			cases *= pairs;                            
+		}                                              
 
-		return cases;                                                                                                                   
+		return cases;                                  
 	}
 
 public:
@@ -161,7 +157,6 @@ public:
 		total = 0;
 		std::cin>>numOfStudent;
 		std::cin>>numOfPair;
-		//numOfPair = numOfStudent*(numOfStudent - 1) / 2;
 		numOfPairInOne = numOfStudent / 2;
 
 		int i = 0;
@@ -182,11 +177,13 @@ public:
 		}
 #endif
 
+		//exception 1. numofStudent divided by 2 can't be less than the size of the size of fridend pair. 
 		if(friend_pair.size() < (numOfStudent/2))
 		{
 			return 0;
 		}
 		
+		//exception 2. calculate in advance this case.
 		if(numOfPair == 1 && numOfStudent == 2)
 		{
 			return 1;
@@ -198,6 +195,7 @@ public:
 		for(auto item : friend_pair)
 		{
 			paired.clear();
+			//pick first pair.
 			paired.push_back(item);
 			remain.assign(friend_pair.begin(), friend_pair.end());
 			item.print("\nstart!");
