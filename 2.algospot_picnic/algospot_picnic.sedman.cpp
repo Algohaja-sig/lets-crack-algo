@@ -10,6 +10,12 @@
  *  3. make more c++11 like!
  */
 
+/* [brief]
+ *
+ *
+ *
+ *
+ */
 //#define DEBUG
 
 class picnic
@@ -25,24 +31,24 @@ private:
 	public:
 		int x = 0,y = 0;
 
-		bool operator!=(const pair &rhs)
+		bool operator==(const pair &rhs)
 		{
 			if(this == &rhs)
 			{
-				return false;
+				return true;
 			}
 
 			//Note!!
 			if(x == rhs.x || y == rhs.y
 			|| x == rhs.y || y == rhs.x)
 			{
-				return false;
+				return true;
 			}
 
-			return true;
+			return false;
 		}
 
-		bool operator==(const pair &rhs)
+		bool operator!=(const pair &rhs)
 		{
 			return !operator!=(rhs);
 		}
