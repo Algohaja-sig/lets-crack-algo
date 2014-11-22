@@ -1,5 +1,6 @@
 #include <memory>
 #include <iostream>
+#include <vector>
 
 /** TODO
  */
@@ -18,32 +19,125 @@ private:
 	boardcover(const boardcover &) = delete;
 	boardcover& operator=(const boardcover &) = delete;
 
-	std::size_t height, width, blocks, result;
-	std::unique_ptr<char[]> matrix;
+	class pos
+	{
+	public:
+		pos(int x_, int y_)
+		:x(x_), y(y_)
+		{
+		}
 
-	const char black = '#';
-	const char white = '.';
-	const int coverType[4][3][2] = {
-	{{0, 0}, {0, 1}, {1, 1}},
-	{{0, 0}, {0, 1}, {-1, 1}},
-	{{0, 0}, {0, 1}, {1, 0}},
-	{{0, 0}, {1, 0}, {1, 1}}
+		int x,y;
 	};
 
-	bool search(const std::size_t pos , const std::size_t num)
-	{ 
+	class block
+	{
+	private:
+		char type;
+
+	public:
+		void setType(const char type_) { type = type_; }
+		char getType(void) const { return type; }
+
+		bool operator==(const char rhs)
+		{
+			return (type == rhs) ? true:false;
+		}
+
+		block(const char& type_)
+		:type(type_)
+		{
+				
+		}
+	};
+	std::vector<std::vector<block>> matrix;
+	
+	std::size_t height, width, blocks, result;
+
+	const char BLACK = '#';
+	const char WHITE = '.';
+	const pos coverType[4][3] = {
+	{{0, 0}, {0, 1}, {1, 1}},
+	{{0, 0}, {0, 1}, {-1, 1}},
+	{{0, 0}, {1, 0}, {0, 1}},
+	{{0, 0}, {1, 0}, {1, 1}}
+	};
+	const pos temp_block[2] = {{0, 0}, {0, 0}};
+	
+	bool checkCover(const pos& cur_pos, const pos *rel_pos)
+	{
+		int i = 1;
+		bool found = true;
+
+		for(; i < 3; ++i)
+		{
+			if(cur_pos.x + rel_pos[i].x < 0 
+			|| cur_pos.x + rel_pos[i].x >= width
+		    || cur_pos.y + rel_pos[i].y < 0
+		    || cur_pos.y + rel_pos[i].y >= height
+			|| matrix[cur_pos.x + rel_pos[i].x][cur_pos.y + rel_pos[i].y] == BLACK)
+			{
+				found = false;		
+				break;
+			}
+		}
+
+		if(found == true)
+		{
+			matrix[cur_pos.x][cur_pos.y].setType(WHITE);	
+			matrix[cur_pos.x + rel_pos[1].x][cur_pos.y + rel_pos[1].y].setType(WHITE);	
+			matrix[cur_pos.x + rel_pos[2].x][cur_pos.y + rel_pos[2].y].setType(WHITE);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	void restoreCover(const pos& cur_pos, const pos *rel_pos)
+	{		
+		matrix[cur_pos.x + rel_pos[1].x][cur_pos.y + rel_pos[1].y].setType(BLACK);	
+		matrix[cur_pos.x + rel_pos[2].x][cur_pos.y + rel_pos[2].y].setType(BLACK);
+	}
+
+	//search all.
+	bool search(const pos& cur_pos, std::size_t num)
+	{
+		//basis
 		if(num == blocks)
 		{
 			result++;
 			return true;		
+		}		
+
+		int i,j,k;
+		for(i = 0; i < 4; ++i)
+		{
+			//check to find block that covers.
+			if( checkCover(cur_pos, coverType[i]) == true )
+			{
+				//FIXME : need better way.
+				for(j = 0; j < height; ++j)
+				{
+					for(k = 0; k < width; ++k)
+					{
+						if(matrix[j][k].getType() == WHITE)
+						{
+							//recursive
+							pos p(j, k);
+							search(p, ++num);
+			
+							//restore for next try
+							--num;
+							restoreCover(cur_pos, coverType[i]);
+						}
+					}
+				}
+			}
 		}
-
 		
-	}
-
-	bool getBlock(const std::size_t pos)
-	{
-		return false;
+		//restore
+		matrix[cur_pos.x][cur_pos.y].setType(BLACK);	
 	}
 
 public:
@@ -57,19 +151,18 @@ public:
 		std::cin>>height;
 		std::cin>>width;
 
-		int i = 0, j = 0;
-
-		std::size_t area = width * height;
-		matrix.reset(new char[area]);
+		std::size_t i = 0, j = 0;
 		
+		char type;
 		std::size_t white_num = 0;
 		for(; i < height; ++i)
 		{
 			for(j = 0; j < width; ++j)
 			{
-				std::cin>>matrix[i * width + j]; 
 
-				if(matrix[i * width + j] == white)
+				std::cin>>type; 
+				matrix[i][j] = type;
+				if(type == WHITE)
 				{
 					white_num++;
 				}
@@ -77,11 +170,12 @@ public:
 		}
 
 		//exception.
-		if(white_num % 3 != 0)
+		if(white_num == 0 || white_num % 3 != 0)
 		{
 			return 0;
 		}
-		
+	
+		//the number of blocks that covers
 		blocks = white_num / 3;
 
 #ifdef DEBUG
@@ -97,12 +191,15 @@ public:
 #endif
 
 		//call main	
-		std::size_t tmp = area;
-		while(tmp--)
-		{	
-			if(getBlock(tmp) == true)
+		for(i = 0; i < height; ++i)
+		{
+			for(j = 0; j < width; ++j)
 			{
-				search(tmp, 0);
+				if(matrix[i][j].getType() == WHITE)
+				{
+					pos p(i,j);
+					search(p, 0);
+				}
 			}
 		}
 
