@@ -45,7 +45,7 @@ private:
 	
 	const block BLACK = '#';
 	const block WHITE = '.';
-	const block COVERED = '@';
+	const block COVERED = '@'; //FIXME : do we need???
     const static int NUM_CANDIDATE_COVER = 4;
 	/*
 	 4 candidates for each try.
@@ -71,17 +71,21 @@ private:
 	
 	bool checkCover(const pos& cur_pos, const pos *rel_pos)
 	{
+		int block_x,block_y;
 		for(int i = 0; i < 2; ++i)
 		{
 #ifdef DEBUG
 			std::cout<<"idx "<<cur_pos.x + rel_pos[i].x<<" "<<cur_pos.y + rel_pos[i].y<<" ";
 #endif
-			if(cur_pos.x + rel_pos[i].x < 0 
-			|| cur_pos.x + rel_pos[i].x >= height
-		    || cur_pos.y + rel_pos[i].y < 0
-		    || cur_pos.y + rel_pos[i].y >= width
-			|| matrix[cur_pos.x + rel_pos[i].x][cur_pos.y + rel_pos[i].y] == BLACK
-			|| matrix[cur_pos.x + rel_pos[i].x][cur_pos.y + rel_pos[i].y] == COVERED)
+			block_x = cur_pos.x + rel_pos[i].x;
+			block_y = cur_pos.y + rel_pos[i].y;
+
+			if(block_x < 0 
+			|| block_x >= height
+		    || block_y < 0
+		    || block_y >= width
+			|| matrix[block_x][block_y] == BLACK
+			|| matrix[block_x][block_y] == COVERED)
 			{
 				//no found!
 				debug_print("no found");
@@ -125,6 +129,7 @@ private:
 		debug_print("search cover");
 		int i,j,k;
 		bool found = false;
+		//search the position of white cover
 		//TODO : need better way.
 		for(j = 0; j < height; ++j)
 		{
@@ -152,9 +157,10 @@ private:
 		pos cur_pos(j, k);
 		cur_pos.print();
 
+		//try 4 candidates of block.
 		for(i = 0; i < NUM_CANDIDATE_COVER; ++i)
 		{
-			//check to find block that covers on cur_pos
+			//check block given by 'i' can cover on cur_pos
 			if( checkCover(cur_pos, coverType[i]) == true )
 			{
 				//recursive
@@ -210,6 +216,7 @@ public:
 		char type;
 		std::size_t white_foundBlocks = 0;
 
+		//init
 		result = 0;
 		matrix.clear();
 		for(i = 0; i < height; ++i)
@@ -234,7 +241,7 @@ public:
 			return 0;
 		}
 	
-		//the foundBlocksber of blocks that cover
+		//the number of blocks that cover all.
 		blocks = white_foundBlocks / 3;
 
 #ifdef DEBUG
@@ -250,7 +257,7 @@ public:
 int main(void)
 {
 	unsigned int total;
-	std::cin>>total;//the foundBlocksber of test case
+	std::cin>>total;
 
 	int i;
 	unsigned int input = 0;
