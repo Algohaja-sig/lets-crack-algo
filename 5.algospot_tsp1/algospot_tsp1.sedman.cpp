@@ -4,13 +4,19 @@
 #include <limits>
 #include <iomanip>
 
-/** TODO
+/** [TODO]
+ * - remove duplicate search (should approach another way)
+ */
+
+/* [History]
+ * - still fail
+ *   : fixed "no reset least Distance in calc" and passed
  */
 
 /* [brief]
- * tsp1 
- * https://algospot.com/judge/problem/read/TSP1
- * performance : 
+ * title : tsp1 
+ * url : https://algospot.com/judge/problem/read/TSP1
+ * performance : 35ms 
  * etc : c++11
  */
 //#define DEBUG
@@ -39,7 +45,7 @@ private:
 		{
 			for(auto xitem : yitem)
 			{
-				std::cout<<std::setprecision(20)<<xitem<<" ";		
+				std::cout<<xitem<<" ";		
 			}
 
 			std::cout<<"\n";
@@ -50,7 +56,7 @@ private:
 	std::size_t cities = 0; 
 	std::size_t visitedNum = 0; 
 	double leastDistance = std::numeric_limits<double>::max();
-	double curDistance = -1;
+	double curDistance = 0;
 	typedef std::vector<double> distType;
 	std::vector<distType> matrix;
 	std::vector<bool> visited;
@@ -58,8 +64,11 @@ private:
 	void search(std::size_t cur_pos)
 	{
 		//basis
-		if(visitedNum == cities - 1)
+		if(visitedNum == cities)
 		{
+#ifdef DEBUG
+			std::cout<<"arrived!!\n"<<std::endl;
+#endif
 			//set least distance
 			if(curDistance < leastDistance)
 			{
@@ -69,12 +78,14 @@ private:
 			return;
 		}
 
-		std::size_t each_idx = 0;
+		//set visited on current position
 		visited[cur_pos] = true;
-		for(double each : matrix[cur_pos])
+
+		//decide next pos.
+		std::size_t each_idx = 0;
+		for(auto each : matrix[cur_pos])
 		{
-			if(cur_pos == each_idx
-			|| visited[each_idx] == true)
+			if(visited[each_idx] == true)
 			{
 				++each_idx;
 				continue;
@@ -83,7 +94,8 @@ private:
 			++visitedNum;
 			curDistance += each;
 #ifdef DEBUG
-			std::cout<<"cur_pos:"<<cur_pos<<" "<<curDistance<<std::endl;
+			std::cout<<"visitedNum : "<<visitedNum<<"  cur_pos:"<<cur_pos<<std::endl;
+			std::cout<<"next pos : "<<each_idx<<" "<<curDistance<<std::endl;
 #endif
 			search(each_idx);
 			
@@ -92,6 +104,8 @@ private:
 
 			++each_idx;
 		}
+
+		//let itself finish the visit
 		visited[cur_pos] = false;
 	}
 
@@ -103,10 +117,13 @@ public:
 	double calc(void)
 	{
 		std::cin>>cities;
-		visitedNum = 0;
 
 		std::size_t i = 0, j = 0;
-	
+
+#ifndef DEBUG
+		std::cout.setf(std::ios::fixed);
+		std::cout.precision(10);
+#endif
 		//init
 		matrix.clear();
 		for(i = 0; i < cities; ++i)
@@ -121,15 +138,20 @@ public:
 
 			matrix.push_back(std::move(dist));
 		}
-
 		visited.assign(cities, false);
 
 		debug_print_map("print all");
 
+	
+		//reset
+		leastDistance = std::numeric_limits<double>::max();
 		//call main
 		for(i = 0; i < cities; ++i)
 		{
-			visitedNum = 0;
+#ifdef DEBUG
+			std::cout<<"city["<<i<<"]"<<std::endl;
+#endif
+			visitedNum = 1;
 			curDistance = 0;
 			search(i);
 		}
@@ -155,7 +177,7 @@ int main(void)
 	
     for(i = 0; i< total; i++)
 	{	
-		std::cout<<std::fixed<<std::setprecision(10)<<result[i]<<std::endl;
+		std::cout<<result[i]<<std::endl;
 	}
 
 	return 0;
