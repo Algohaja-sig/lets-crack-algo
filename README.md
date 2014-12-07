@@ -11,7 +11,7 @@ lets-crack-algo
 
 ###Tips
 ```
-  Keywords about exhaustive search using recursive call is
-  1. do the same thing in each call.
-  2. restore after the call.
+  Keywords about exhaustive search using recursive call I understand are
+  1. Do the same thing in each call.
+  2. Restore after the call for the next.
 ```
