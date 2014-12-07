@@ -13,5 +13,5 @@ lets-crack-algo
 ```
   Keywords about exhaustive search using recursive call I understand are
   1. Do the same thing in each call.
-  2. Restore after the call for the next.
+  2. Restore after the call for a next try.
 ```
