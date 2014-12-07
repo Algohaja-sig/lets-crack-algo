@@ -62,8 +62,6 @@ protected:
 	static const std::size_t nBlocks = 5;
 	char blocks[nBlocks][nBlocks];
 	//hash_map map;	
-	std::vector<std::string> result;
-		
 	std::string matched_str;
 
 	char getBlock(const int cur_pos) const
@@ -72,6 +70,8 @@ protected:
 	}
 
 private:
+	std::vector<std::string> result;
+	
 	bool run(const std::string &given_str)
 	{
 		int cur_pos = 0; 
