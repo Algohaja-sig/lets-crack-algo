@@ -10,4 +10,8 @@ lets-crack-algo
 - [5) algospot_tsp1(traveling_salesman_problem1)](https://algospot.com/judge/problem/read/TSP1)
 
 ###Tips
-
+```
+  Keywords about exhaustive search using recursive call I understand are
+  1. Do the same thing in each call.
+  2. Restore after the call for a next try.
+```
