@@ -2,6 +2,9 @@
 #include <iostream>
 #include <array>
 #include <algorithm>
+#include <limits>
+
+//#define DEBUG
 
 class clocksync
 {
@@ -22,9 +25,11 @@ private:
 	{{3,  4,  5,  9, 13}}
 	}};
 
+	std::size_t MAX = std::numeric_limits<std::size_t>::max();
+	std::size_t minPressed = MAX;
 	std::size_t pressed = 0;
 	
-	bool allReachTo12(void)
+	bool allReachAt12(void)
 	{
 		for(auto clock : clocks)
 		{
@@ -37,8 +42,11 @@ private:
 		return true;
 	}
 
-	void updateClocks(const std::size_t switchIdx)
+	void pressSwitch(const std::size_t switchIdx)
 	{
+#ifdef DEBUG
+		std::cout<<"press switch : "<<switchIdx<<std::endl;
+#endif
 		for(auto idx : switches[switchIdx])
 		{
 			if(idx == -1)
@@ -52,32 +60,66 @@ private:
 		}
 	}
 
-	int search(const std::size_t button)
+	std::size_t search(const std::size_t button)
 	{
-		if(allReachTo12() == true)
+#ifdef DEBUG
+		std::cout<<"+++++ new seach button : "<<button<<std::endl;
+#endif
+		if(allReachAt12() == true)
 		{
-			return 0;
+			print("allReachAt12");	
+			return MAX;
 		}
 
 		if(button == 10)
 		{
-			return -1;
+			print("button reaches to 10");	
+			return 0;
 		}
 
 		std::size_t idx = 0;
 		for(; idx < 4; ++idx)
 		{
-			int ret = search(button + 1);
+			std::size_t ret = search(button + 1);
 
-			++pressed;
-			if(ret == 0)
+#ifdef DEBUG
+			std::cout<<"minPressed : "<<minPressed<<" ret : "<<ret<<" idx :"<<idx<<"\n";
+#endif
+			if(ret == MAX && minPressed > (pressed + idx))
 			{
-				return pressed;
+				minPressed = ret + idx;
+			}
+			else
+			{
+				pressed = pressed + idx;
 			}
 
-			updateClocks(button);
+			pressSwitch(button);
 		}
 
+		print_clocks("------");
+		
+#ifdef DEBUG
+		std::cout<<"\n";
+#endif
+		return minPressed;
+
+	}
+
+	void print(const std::string debug) const
+	{
+#ifdef DEBUG
+		std::cout<<debug<<std::endl;
+#endif		
+	}
+
+	void print_clocks(const std::string prefix) const
+	{
+#ifdef DEBUG
+		std::cout<<prefix<<" ";
+		std::for_each(clocks.begin(), clocks.end(), [](const std::size_t item){std::cout<<item<<" ";});
+		std::cout<<"\n";
+#endif	
 	}
 
 public:
@@ -87,26 +129,25 @@ public:
 
 	int calc(void)
 	{
-		int tmp;
+		pressed = 0;
+		minPressed = MAX;
 		for(auto &item : clocks)
 		{
 			std::cin>>item;
 		}
 
+#ifdef DEBUG
 		for(auto item : clocks)
 		{
 			std::cout<<item<<" ";
 		}
-
-		if(allReachTo12() == true)
+#endif
+		if(allReachAt12() == true)
 		{
 			return 1;
 		}
 
-		pressed = 0;
-		search(0);
-
-		return pressed;
+		return search(0);
 	}
 };
 
