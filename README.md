@@ -8,6 +8,8 @@ lets-crack-algo
 - [3) algospot_boardcover](https://algospot.com/judge/problem/read/BOARDCOVER)
 - [4) algospot_clocksync](https://algospot.com/judge/problem/read/CLOCKSYNC)
 - [5) algospot_tsp1(traveling_salesman_problem1)](https://algospot.com/judge/problem/read/TSP1)
+- [6) algospot_quardtree](https://algospot.com/judge/problem/read/QUADTREE)
+- [7) algospot_tsp2(traveling_salesman_problem2)](https://algospot.com/judge/problem/read/TSP2)
 
 ###Tips
 ```
