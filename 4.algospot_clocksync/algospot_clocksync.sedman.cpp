@@ -9,6 +9,9 @@
 class clocksync
 {
 private:
+	clocksync(const clocksync&) = delete;
+	clocksync& operator(const clocksync& ) = delete;
+
 	typedef std::array<std::size_t, 16> clocks_t;
 	clocks_t clocks;
 	typedef std::array<int, 5> clocksPerSwitch_t;
@@ -26,9 +29,9 @@ private:
 	}};
 
 	std::size_t MAX = std::numeric_limits<std::size_t>::max();
-	std::size_t minPressed = MAX;
 	std::size_t pressed = 0;
-	
+	std::size_t minPressed = MAX;
+
 	bool allReachAt12(void)
 	{
 		for(auto clock : clocks)
@@ -63,57 +66,61 @@ private:
 	std::size_t search(const std::size_t button)
 	{
 #ifdef DEBUG
-		std::cout<<"+++++ new seach button : "<<button<<std::endl;
+		std::cout<<"\n+++++ new seach button : "<<button<<" pressed : "<<pressed<<std::endl;
 #endif
+		//hit!!!
 		if(allReachAt12() == true)
 		{
-			print("allReachAt12");	
-			return MAX;
-		}
-
-		if(button == 10)
-		{
-			print("button reaches to 10");	
+			print("******allReachAt12");	
 			return 0;
 		}
 
+		//Can't go further. Only available from 0 to 9
+		if(button == 10)
+		{
+			print("------button reaches to 10");	
+			return MAX;
+		}
+
+		//from 0 to 3
 		std::size_t idx = 0;
 		for(; idx < 4; ++idx)
 		{
 			std::size_t ret = search(button + 1);
-
 #ifdef DEBUG
 			std::cout<<"minPressed : "<<minPressed<<" ret : "<<ret<<" idx :"<<idx<<"\n";
 #endif
-			if(ret == MAX && minPressed > (pressed + idx))
+			if(ret == 0 && minPressed > pressed)
 			{
-				minPressed = ret + idx;
+#ifdef DEBUG
+				std::cout<<"#####hit : "<<pressed<<std::endl;
+#endif
+				minPressed = pressed;
 			}
-			else
-			{
-				pressed = pressed + idx;
-			}
+
+			++pressed;
 
 			pressSwitch(button);
+			print_clocks("");
 		}
 
-		print_clocks("------");
+		pressed -= 4;
+
 		
 #ifdef DEBUG
-		std::cout<<"\n";
+		std::cout<<"-------button : "<<button<<" pressed : "<<pressed<<"\n\n";
 #endif
 		return minPressed;
-
 	}
 
-	void print(const std::string debug) const
+	void print(const std::string& debug) const
 	{
 #ifdef DEBUG
 		std::cout<<debug<<std::endl;
 #endif		
 	}
 
-	void print_clocks(const std::string prefix) const
+	void print_clocks(const std::string& prefix) const
 	{
 #ifdef DEBUG
 		std::cout<<prefix<<" ";
@@ -146,8 +153,11 @@ public:
 		{
 			return 1;
 		}
+		
 
-		return search(0);
+		search(0);
+		
+		return (minPressed == MAX) ? -1 : minPressed;
 	}
 };
 
@@ -159,7 +169,7 @@ int main(void)
 
 	int i;
 	unsigned int input = 0;
-	std::unique_ptr<std::size_t[]> result(new std::size_t[total]);
+	std::unique_ptr<int[]> result(new int[total]);
 
 	clocksync cs;
 	for(i = 0; i < total; i++)
@@ -169,7 +179,7 @@ int main(void)
 
     for(i = 0; i< total; i++)
 	{	
-		std::cout<<"\n---"<<result[i]<<std::endl;
+		std::cout<<result[i]<<std::endl;
 	}
 
 	return 0;
