@@ -1,3 +1,5 @@
+//url : https://algospot.com/judge/submission/detail/207666
+
 #include <stdio.h>
 #include <memory.h>
 #include <iostream>
