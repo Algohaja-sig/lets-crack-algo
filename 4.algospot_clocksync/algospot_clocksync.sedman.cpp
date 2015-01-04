@@ -174,12 +174,18 @@ public:
 	}
 };
 
-#ifdef TEXTBOOK //doesn't work
+#ifdef TEXTBOOK 
+/*
+ * It always returns 0 because std::min always gets 0 when it finds "all 12s",
+ * which is the least value. This is wrong
+ */
 class clocksync_textbook : public clocksync
 {
 private:
 	std::size_t search(const std::size_t cur_switch)
 	{
+		//basis
+		//what if cur_switch is less than nSwitch but alreay HIT!
 		if(cur_switch == nSwitch)
 		{
 			return allReachAt12() ? HIT : MAX;
@@ -187,12 +193,14 @@ private:
 		
 		std::size_t ret = MAX;
 
+		//recursive
 		for(int cnt = 0; cnt < 4; ++cnt)
 		{
 			ret = std::min(ret, cnt + search(cur_switch + 1));
 			pressSwitch(cur_switch);
 		}
 
+		//if any "HIT" is not found, ret returns MAX
 		return ret;
 	}
 };
