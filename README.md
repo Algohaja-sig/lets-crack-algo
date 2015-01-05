@@ -11,6 +11,7 @@ lets-crack-algo
 - [6) algospot_quardtree](https://algospot.com/judge/problem/read/QUADTREE)
 - [7) algospot_tsp2(traveling_salesman_problem2)](https://algospot.com/judge/problem/read/TSP2)
 - [8) algospot_gallery](https://algospot.com/judge/problem/read/GALLERY)
+
 ###Tips
 ```
   Keywords about exhaustive search using recursive call I understand are
