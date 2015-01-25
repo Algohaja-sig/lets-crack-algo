@@ -2,6 +2,9 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <algorithm>
+
+//mostly from textbook
 
 #define DEBUG
 
@@ -11,30 +14,73 @@ private:
 	std::size_t nWord;
 	std::vector<std::string> words;
 	std::string result;
-	typedef std::array<std::array<int, 100>, 100> arr_t;
-	arr_t adj;
-	std::array<bool, 100> visited;
 
-	void dfs(const int here)
+	static const int nAlpha = 26;
+	std::array<std::array<std::vector<std::string>, nAlpha>, nAlpha> graph;
+	std::array<std::array<int, nAlpha>, nAlpha> adj;
+	std::array<int, nAlpha> indegree;
+	std::array<int, nAlpha> outdegree;
+
+	void getCircuit(int here, std::vector<int>& circuit)
 	{
-		visited[here] = true;
-		std::cout<<"*here : "<<here<<" nWord : "<<nWord<<std::endl;	
-
-		result.append(words[here] + " ");
-		
-		int to = 0;
-		for(; to < words.size(); ++to)
+		for(int there = 0; there < adj.size(); ++there)
 		{
-			std::cout<<"+here : "<<here<<" to : "<<to<<" word : "<<words.size()<<std::endl;
-			
-			if(visited[to] == false && adj[here][to] == 1)
+			while(adj[here][there] > 0)
 			{
 #ifdef DEBUG
-				std::cout<<"@here : "<<here<<" to : "<<to<<" word : "<<words[to]<<std::endl;
+				std::cout<<"here : "<<static_cast<char>(here + 'a')<<" there : "<<static_cast<char>(there + 'a')<<std::endl;
 #endif
-				dfs(to);
+				--adj[here][there];
+				getCircuit(there, circuit);
+
 			}
 		}
+
+		circuit.push_back(here);
+	}
+
+	std::vector<int> getTrailOrCircuit(void)
+	{
+		std::vector<int> circuit;
+
+		int i = 0;
+		//first, check trail.
+		for(; i < indegree.size(); ++i)
+		{
+			if(outdegree[i] == indegree[i] + 1)
+			{
+				getCircuit(i, circuit);
+				return circuit;
+			}
+		}
+
+		//last check circuit
+		for(i = 0; i < indegree.size(); ++i)
+		{
+			if(outdegree[i])
+			{
+				getCircuit(i, circuit);
+				return circuit;
+			}
+		}
+
+		return circuit;
+	}
+
+	bool checkEuler(void)
+	{
+		int plus1 = 0, minus1 = 0;
+		for(int i = 0; i < nAlpha; ++i)
+		{
+			int delta = outdegree[i] - indegree[i];
+
+			if(delta < -1 || 1 < delta) return false;
+
+			if(delta == 1) plus1++;
+			if(delta == -1) minus1++;
+		}
+
+		return (plus1 == 1 && minus1 == 1) || (plus1 == 0 && minus1 == 0);
 	}
 
 public:
@@ -50,60 +96,80 @@ public:
 			std::cin>>input;
 			words.push_back(std::move(input));
 		}
-		
-		for(auto &item : adj)
+
+		if(nWord == 1)
 		{
-			item.fill(0);
+			return words[0];
+		}
+		
+		int idx = 0;
+		indegree.fill(0);
+		outdegree.fill(0);
+
+		for(auto &grp : adj)
+		{
+			grp.fill(0);
 		}
 
-		int from = 0, to = 0;
-		for(; from < nWord; ++from)
+		for(; idx < nWord; ++idx)
 		{
-			for(to = 0; to < nWord; ++to)
-			{
-				if(from != to)
-				{
-					std::string word1 = words[from];
-					std::string word2 = words[to];
-					if(word1[word1.length() - 1] == word2[0])
-					{
-						adj[from][to] = 1;					
-					}
-				}
-			}
+			char from = words[idx][0] - 'a';
+			char to = words[idx][words[idx].length() - 1] - 'a';
+#ifdef DEBUG	
+			std::cout<<"from : "<<words[idx][0]<<" to : "<<words[idx][words[idx].length() - 1]<<" word1 : "<<words[idx]<<std::endl;
+#endif
+			graph[from][to].push_back(words[idx]);			
+
+			adj[from][to]++;
+			outdegree[from]++;
+			indegree[to]++;
 		}
-		
-#ifdef DEBUG
-		for(from = 0; from < nWord; ++from)
+
+		//check circuit or trail
+		if(checkEuler() == false)
 		{
-			for(to = 0; to < nWord; ++to)
+			return std::string("IMPOSSIBLE");
+		}
+
+#ifdef DEBUG
+		for(const auto grp : adj)
+		{
+			for(const auto item : grp)
 			{
-				std::cout<<adj[from][to]<<" ";
+				std::cout<<item<<" ";
 			}
 			std::cout<<"\n";
 		}
 #endif
 		
-		visited.fill(false);
-		
-		bool first = false;
-		for(from = 0; from < nWord; ++from)
-		{
-			if(visited[from] == false)
-			{
-				if(first == true)
-				{
-					return std::string("IMPOSSIBLE");
-				}
+		result.clear();
+		auto ret = getTrailOrCircuit();
 
-				first = true;
-#ifdef DEBUG
-				std::cout<<"##word : "<<words[from]<<std::endl;
-#endif
-				dfs(from);
-			}
+		//if not equal, this means there is a seperate one.
+		if(ret.size() != words.size() + 1)
+		{
+			return std::string("IMPOSSIBLE");
 		}
+
+		std::reverse(ret.begin(), ret.end());
+	
+		//auto successCnt = nWord;
+		for(idx = 1; idx < ret.size(); ++idx)
+		{
+			char first = static_cast<char>(ret[idx - 1]);	
+			char second = static_cast<char>(ret[idx]);
 		
+			result.append(graph[first][second].back() + " ");
+			graph[first][second].pop_back();
+
+			//--successCnt;
+		}
+
+		//if(successCnt > 0)
+		//{
+		//	return std::string("IMPOSSIBLE");
+		//}
+
 		return result;
 	}
 
