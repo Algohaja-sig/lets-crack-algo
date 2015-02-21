@@ -1,6 +1,7 @@
 #include <memory>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 /* TODO : 
 */
@@ -19,52 +20,125 @@
 3. subtree returns Leaf.
 */
 
+/*
+Coner cases
+### 1
+1 
+7 6
+0 1
+1 2
+1 3
+3 4
+3 5
+5 6
+
+### 2
+1
+4 3
+0 1
+1 2
+2 3
+
+### 3
+1
+13 11
+0 1
+1 2
+2 3
+3 4
+2 6
+6 5
+6 7
+1 8
+9 10 
+10 11
+11 12
+5
+
+
+*/
+//#define DEBUG
+
 class gallery
 {
 private:
 	enum class status {
 		Installed,
 		Watched,
-		Leaf
+		Unwatched,
 	};
 
 	std::vector<std::vector<int>> adj;
 	std::vector<bool> visited;
 	std::size_t nInstalled = 0;
-	std::vector<bool> installed;
+	std::vector<int> c;
 
-	status dfs(const int here)
+	void installCamera(const int here)
+	{	
+#ifdef DEBUG
+		std::cout<<"installed "<<here<<"\n";
+#endif
+		++nInstalled;
+		c.push_back(here);
+	}
+
+	status dfs(const int here, const bool root)
 	{
 		visited[here] = true;
-
-		status child_ret = status::Leaf;
-		status result = child_ret;
+#ifdef DEBUG
+		std::cout<<">>>here : "<<here<<std::endl;
+#endif
+		status here_status = status::Unwatched;
 		for(int there = 0; there < adj.size(); ++there)
 		{
-			if(visited[there] == false)//here is not a leaf
+			if(adj[here][there] == 1)
 			{
-				status child_ret = dfs(there);
-
-				if((child_ret == status::Leaf || child_ret == status::Watched)
-				&& installed[here] == false)
+				if(visited[there] == false)				
 				{
-					++nInstalled;
-					installed[here] = true;
-					
-					result = status::Installed;
+						status child_ret = dfs(there, false);
+	#ifdef DEBUG
+						std::cout<<" here : "<<here<<" here_status : "<<static_cast<int>(here_status)<<" child ret : "<<static_cast<int>(child_ret)<<" there : "<<there<<std::endl;
+	#endif
+						if(here_status != status::Installed)
+						{
+							if(child_ret == status::Unwatched)
+							{
+								installCamera(here);
+								here_status = status::Installed;
+							}
+							else if(child_ret == status::Installed)
+							{
+								here_status = status::Watched;	
+							}
+							else//child_ret must be "watched"
+							{
+								here_status = status::Unwatched;
+							}
+						}
+						else
+						{
+							return here_status; //to let parent know who I am
+						}
 				}
 				else
 				{
-					if(child_ret == status::Installed
-					&& result != status::Installed)
+					if(here_status == status::Installed)
 					{
-						result = status::Watched;		
+						return here_status; //to let parent know who I am
 					}
 				}
 			}
 		}
 
-		return result; //to let parent know who I am
+		if(root == true)
+		{
+			if(here_status == status::Unwatched)
+			{
+				++nInstalled;
+			}
+		}
+
+		return here_status; //to let parent know who I am
 
 	}
 
@@ -97,18 +171,23 @@ public:
 		}
 
 		visited = std::vector<bool>(nVertex, false);
-		installed = std::vector<bool>(nVertex, false);
 		nInstalled = 0;
 
+
+		c.clear();
 		for(i = 0; i < nVertex; ++i)
 		{
 			if(visited[i] == false)
 			{
-				dfs(i);
+				dfs(i, true);
+#ifdef DEBUG 
+				std::cout<<"##nInstalled : "<<nInstalled<<std::endl;
+#endif
 			}
 		}
-
-
+#ifdef DEBUG
+		std::for_each(c.begin(), c.end(), [](const int item){std::cout<<item<<" ";});
+#endif
 		return nInstalled;
 	}
 };
