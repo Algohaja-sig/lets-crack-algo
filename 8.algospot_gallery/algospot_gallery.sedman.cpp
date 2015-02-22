@@ -105,6 +105,7 @@ private:
 							{
 								installCamera(here);
 								here_status = status::Installed;
+								return here_status; //to let parent know who I am
 							}
 							else if(child_ret == status::Installed)
 							{
@@ -115,17 +116,6 @@ private:
 								here_status = status::Unwatched;
 							}
 						}
-						else
-						{
-							return here_status; //to let parent know who I am
-						}
-				}
-				else
-				{
-					if(here_status == status::Installed)
-					{
-						return here_status; //to let parent know who I am
-					}
 				}
 			}
 		}
