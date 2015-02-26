@@ -71,17 +71,7 @@ private:
 	std::vector<std::vector<int>> adj;
 	std::vector<bool> visited;
 	std::size_t nInstalled = 0;
-	std::vector<int> c;
-
-	void installCamera(const int here)
-	{	
-#ifdef DEBUG
-		std::cout<<"installed "<<here<<"\n";
-#endif
-		++nInstalled;
-		c.push_back(here);
-	}
-
+	
 	status dfs(const int here, const bool root)
 	{
 		visited[here] = true;
@@ -95,27 +85,29 @@ private:
 			{
 				if(visited[there] == false)				
 				{
-						status child_ret = dfs(there, false);
-	#ifdef DEBUG
-						std::cout<<" here : "<<here<<" here_status : "<<static_cast<int>(here_status)<<" child ret : "<<static_cast<int>(child_ret)<<" there : "<<there<<std::endl;
-	#endif
-						if(here_status != status::Installed)
+					status child_ret = dfs(there, false);
+#ifdef DEBUG
+					std::cout<<" here : "<<here<<" here_status : "<<static_cast<int>(here_status)<<" child ret : "<<static_cast<int>(child_ret)<<" there : "<<there<<std::endl;
+#endif
+					if(here_status != status::Installed)
+					{
+						if(child_ret == status::Unwatched)
 						{
-							if(child_ret == status::Unwatched)
-							{
-								installCamera(here);
-								here_status = status::Installed;
-								return here_status; //to let parent know who I am
-							}
-							else if(child_ret == status::Installed)
-							{
-								here_status = status::Watched;	
-							}
-							else//child_ret must be "watched"
-							{
-								here_status = status::Unwatched;
-							}
+#ifdef DEBUG
+							std::cout<<"installed "<<here<<"\n";
+#endif
+							here_status = status::Installed;
+							++nInstalled;
 						}
+						else if(child_ret == status::Installed)
+						{
+							here_status = status::Watched;	
+						}
+						else//child_ret must be "watched"
+						{
+							here_status = status::Unwatched;
+						}
+					}
 				}
 			}
 		}
@@ -164,7 +156,6 @@ public:
 		nInstalled = 0;
 
 
-		c.clear();
 		for(i = 0; i < nVertex; ++i)
 		{
 			if(visited[i] == false)
@@ -175,9 +166,6 @@ public:
 #endif
 			}
 		}
-#ifdef DEBUG
-		std::for_each(c.begin(), c.end(), [](const int item){std::cout<<item<<" ";});
-#endif
 		return nInstalled;
 	}
 };
