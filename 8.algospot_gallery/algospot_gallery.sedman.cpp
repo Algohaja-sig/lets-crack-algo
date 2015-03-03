@@ -9,7 +9,8 @@
 /* [brief]
  * gallery  
  * https://algospot.com/judge/problem/read/GALLERY
- * performance : timeout (1000ms)
+ * performance : adjacency matrix : O(V * E) 131ms 
+ *				 adjacency list : O(V + E) 18ms
  * etc : c++11
  */
 
@@ -52,11 +53,8 @@
 10 11
 11 12
 5
-<<<<<<< HEAD
- */
-=======
 
-fail case
+###4
 1
 19 13
 11 9 
@@ -74,7 +72,6 @@ fail case
 2 13
 
 */
->>>>>>> 0d61d0fb29de50ea4cc4b998456d4b59fba5c3a6
 //#define DEBUG
 
 class gallery
